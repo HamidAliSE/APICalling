@@ -1,6 +1,32 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, Button} from 'react-native';
+
 import axios from 'axios';
+
+const BaseURL = 'https://jsonplaceholder.typicode.com';
+
+const TODOS = 'todos';
+const POSTS = 'posts';
+const USERS = 'users';
+const ALBUMS = 'albums';
+const PHOTOS = 'photos';
+const COMMENTS = 'comments';
+
+const ResourcePathGenerator = ({resource, id}) => {
+  if (!id) {
+    return `/${resource}`;
+  }
+  return `/${resource}/${id}`;
+};
+
+const EndPointGenerator = ({resource, id}) => {
+  console.log('Resource: ', resource);
+  const ResourcePath = ResourcePathGenerator({resource, id});
+  console.log('End Point: ', `${BaseURL}${ResourcePath}`);
+  return `${BaseURL}${ResourcePath}`;
+};
+
+const QueryParameters = '';
 
 const App = () => {
   console.log('Rendering App');
@@ -13,7 +39,7 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get('https://jsonplaceholder.typicode.com/todos/1')
+      .get(EndPointGenerator({resource: TODOS, id: 1}))
       .then(response => {
         setTodo(response.data);
         axios
@@ -60,6 +86,43 @@ const App = () => {
       });
   }, []);
 
+  const addTask = async () => {
+    // With Fetch
+    // fetch('https://jsonplaceholder.typicode.com/todos', {
+    //   method: 'POST',
+    //   body: JSON.stringify({
+    //     userId: 1,
+    //     title: 'API Calling',
+    //     completed: false,
+    //   }),
+    //   headers: {
+    //     'Content-type': 'application/json; charset=UTF-8',
+    //   },
+    // })
+    //   .then(response => {
+    //     console.log('response', response);
+    //     return response.json();
+    //   })
+    //   .then(json => {
+    //     console.log('json', json);
+    //   });
+
+    // With Axios
+    try {
+      const response = await axios.post(EndPointGenerator({resource: POSTS}), {
+        method: 'post',
+        data: {
+          userId: 1,
+          completed: false,
+          title: 'API Calling',
+        },
+      });
+      console.log('data: ', response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <View style={styles.screen}>
       {loading ? (
@@ -90,6 +153,10 @@ const App = () => {
             <Text>{`Name: ${user.name}`}</Text>
             <Text>{`Email: ${user.email}`}</Text>
           </View>
+          <View style={{height: 10}} />
+          <View style={styles.buttonContainer}>
+            <Button title="Add Task" onPress={addTask} />
+          </View>
         </>
       )}
     </View>
@@ -109,6 +176,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 20,
 
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: 'black',
+  },
+  buttonContainer: {
     borderWidth: 1,
     borderRadius: 10,
     borderColor: 'black',
